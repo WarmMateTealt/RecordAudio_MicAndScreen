@@ -48,12 +48,15 @@
   // Options for getDisplayMedia()
 
   // não tem como capturar só áudio; a esperança é isolar o áudio com ferramentas do kit mesmo
+  // loucura de SOMEHOW fazer o browser só sugerir a própria guia :)
+  // (https://stackoverflow.com/questions/73742556/how-to-use-navigator-getdisplaymedia-with-auto-selecting-the-screen) e
+  // (https://stackoverflow.com/questions/75912092/navigator-mediadevices-getdisplaymedia-does-not-show-the-current-tab)
   const displayMediaOptions = {
     video: {
       displaySurface: "browser",
     },
     audio: {
-      channelCount: 1,
+      channelCount: 2,
       echoCancellation: true,
       noiseSuppression: true,
     },
@@ -101,7 +104,14 @@
       // ^ aqui a esperança é matar o fluxo de vídeo, mantendo o de áudio vivo 
       //(https://github.com/w3c/mediacapture-screen-share-extensions/issues/12#issuecomment-1960941085)
 
-      var OutgoingMediaStream = new MediaStream([audioTrackFromCombined]);
+      // multiple audio tracks extraction from stream
+      //(https://stackoverflow.com/questions/75598622/how-do-i-capture-only-audio-from-mediadevices-getdisplaymedia)
+      // audio stream union
+      //(https://stackoverflow.com/questions/64717758/merge-two-audio-tracks-into-one-track)
+      var OutgoingMediaStream = new MediaStream();
+      for (const track of displayMediaCombinedStream.getAudioTracks()) {
+          OutgoingMediaStream.addTrack(track);
+      }
       var IngoingMediaStream = new MediaStream(userMicStream);
 
       const audioContext = new AudioContext();
