@@ -20,9 +20,6 @@
     </button>
   </p>
 
-  <audio hidden id="video" autoplay muted></audio> <!--originalmente era um video; agora prov. funciona um audio-->
-  <br />
-
   <iframe width="560" height="315" src="https://www.youtube.com/embed/Na0w3Mz46GA?si=jEysFGmOO1jFk6or" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
   <strong>Log:</strong>
@@ -38,12 +35,13 @@
 </html>
 
 <script>
-  const videoElem = document.getElementById("video");  //Id=video, tag: audio KKKKK
   const logElem = document.getElementById("log");
   const startElem = document.getElementById("start");
   const stopElem = document.getElementById("stop");
+  const recordingElem = document.getElementById("recording");
   var sourceToStop_01;
   var sourceToStop_02;
+  var recorderToStop;
 
   // Options for getDisplayMedia()
 
@@ -91,12 +89,11 @@
     logElem.textContent = "";
 
     try {
-      userMicStream = await navigator.mediaDevices.getUserMedia({video: false,audio: true,}).catch(e => {throw e});
-      displayMediaCombinedStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
-      //throw error if any of these go awry
-
+      userMicStream = await navigator.mediaDevices.getUserMedia({video: false,audio: true,});
       sourceToStop_01 = userMicStream;
+      displayMediaCombinedStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
       sourceToStop_02 = displayMediaCombinedStream;
+      //throw error and call stop rec (release streams) if any of these go awry
 
       const audioTrackFromCombined = displayMediaCombinedStream.getAudioTracks()[0];
       const videoTrackFromCombined = displayMediaCombinedStream.getVideoTracks()[0];
@@ -126,7 +123,9 @@
       
       var finalStream = mediaStreamDestination.stream;
 
-      const recordedChunks = await startRecording(finalStream, 10000); // como fazer essa bomba parar quando um eventão bonito apertar ela? é só remover a promise recorded, e posso remover a promise.all tbm
+      console.log("started rec\n");
+      const recordedChunks = await startRecording(finalStream);
+      console.log("stopped rec\n");
       // pra parar ainda to usando o hack do video mas como audio :D
 
       let recordedBlob = new Blob(recordedChunks, { type: "audio/webm" });
@@ -138,34 +137,37 @@
         `Successfully recorded ${recordedBlob.size} bytes of ${recordedBlob.type} media.`,
       );
       
-      //videoElem.srcObject = finalStream;
-      
       dumpOptionsInfo();
     } catch (err) {
+      stopCapture();
       console.error(err);
     }
   }
 
   function stopCapture(evt) {
-    // let tracks = videoElem.srcObject.getTracks();
-
-    // tracks.forEach((track) => track.stop());
-    // videoElem.srcObject = null;
-
+    console.log('stop function fired\n');
+    
     let tracks = sourceToStop_01.getTracks();
     tracks.forEach((track) => track.stop());
     
-   tracks = sourceToStop_02.getTracks();
+    tracks = sourceToStop_02.getTracks();
     tracks.forEach((track) => track.stop());
+
+    recorderToStop.stop();
   }
 
   function dumpOptionsInfo() {
-    const videoTrack = videoElem.srcObject.getVideoTracks()[0];
+    const audioTracks = recordingElem.srcObject.getAudioTracks();
 
-    console.log("Track settings:");
-    console.log(JSON.stringify(videoTrack.getSettings(), null, 2));
-    console.log("Track constraints:");
-    console.log(JSON.stringify(videoTrack.getConstraints(), null, 2));
+    for (const track of audioTracks) {
+      console.log("Audio Track " + track.id + ":\n");
+      console.log("Track settings:\n");
+      console.log(JSON.stringify(track.getSettings(), null, 2));
+      console.log("Track constraints:\n");
+      console.log(JSON.stringify(track.getConstraints(), null, 2));
+      console.log('\n');
+    }
+    
   }
 
 
@@ -175,7 +177,8 @@
   //    mesmo esquema da stream de microfone
   // juntar os dois em uma stream sendo salva
 
-  function startRecording(stream, lengthInMS) {
+  // função de gravar original; ela para no stop, ou após lengthInMS 
+  function startRecordingTimed(stream, lengthInMS) {
     let recorder = new MediaRecorder(stream);
     let data = [];
 
@@ -195,6 +198,23 @@
     });
 
     return Promise.all([stopped, recorded]).then(() => data);
+  }
+
+  // função de gravar alterada: só para de gravar no evento de stop do recorder (espera-se)
+  function startRecording(stream) {
+    recorderToStop = new MediaRecorder(stream);
+    let data = [];
+
+    recorderToStop.ondataavailable = (event) => data.push(event.data);
+    recorderToStop.start();
+    log(`${recorderToStop.state} - audio channel`);
+
+    let stopped = new Promise((resolve, reject) => {
+      recorderToStop.onstop = resolve;
+      recorderToStop.onerror = (event) => reject(event.name);
+    });
+
+    return stopped.then(() => data);
   }
 
   function log(msg) {
