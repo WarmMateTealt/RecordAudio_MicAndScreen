@@ -1,3 +1,10 @@
+/**
+ * Módulo para a gravação simultânea de áudio vindo do mic do usuário e da aba do navegador aberta.
+ * Preocupação sobre compatibilidade entre navegadores. Talvez posteriormente tratar com https://github.com/webrtc/adapter
+ *
+ * @module
+ */
+
 var sourceToStop_01;
 var sourceToStop_02;
 var recorderToStop;
@@ -23,11 +30,11 @@ const displayMediaOptions = {
 
 };
 
-/** Inicia a captura do áudio do mic e da aba atual do navegador. 
-O usuário PRECISA dar permissão para acessar o mic e o áudio da aba.
-Embora a permissão diga que vai capturar a tela, oficialmente a trilha de vídeo é encerrada quase imediatamente - é culpa do devkit que não permite uma requisição exclusiva de streaming de áudio. 
-Considerações sobre a quantidade de memória requerida para armazenar a gravação estão em análise.
-Retorna um Blob contendo a gravação em formato WEBM (áudio). */
+/** Inicia a captura do áudio do mic e da aba atual do navegador.
+ * O usuário PRECISA dar permissão para acessar o mic e o áudio da aba.
+ * Embora a permissão diga que vai capturar a tela, oficialmente a trilha de vídeo é encerrada quase imediatamente - é culpa do devkit que não permite uma requisição exclusiva de streaming de áudio. 
+ * Considerações sobre a quantidade de memória requerida para armazenar a gravação estão em análise.
+ * Retorna um Blob contendo a gravação em formato WEBM (áudio). */
 async function startCapture() {
   console.log("internal start capture");
 
