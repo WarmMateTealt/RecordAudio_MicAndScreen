@@ -47,22 +47,22 @@
     "click",
     async (evt) => {
       console.log("click");
-      fileRef = await startCapture();
+      file = await startCapture();
+      fileRef = URL.createObjectURL(file);
       console.log("received blob url:" + fileRef);
       recording.src = fileRef;
       downloadButton.href = recording.src;
       downloadButton.download = "RecordedAudio.webm";
 
       // Fetch API request
-      const url = "https://localhost:4000/api/upload";
+      const url = "http://localhost:4000/api/upload";
       const formData = new FormData();
-      formData.append("file", fileRef);
+      formData.append("file", file);
       
       fetch(url, {
         method: 'POST',
         body: formData,
         headers: {
-          "Content-type": "multipart/form-data",
           "x-api-key": "132657ef-f954-4114-a0a7-1c5bec6d068d"
         }
       }).then(response => response.json())

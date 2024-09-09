@@ -87,7 +87,7 @@ async function startCapture() {
       `Successfully recorded ${recordedBlob.size} bytes of ${recordedBlob.type} media.`,
     );
 
-    return await generateFileURL(recordedBlob);
+    return recordedBlob;
   } catch (err) {
     stopCapture();
     console.error(err);
