@@ -58,7 +58,7 @@
       // Fetch API request
       const url = "http://localhost:4000/api/upload";
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", file, "RecordedAudio.webm");
       
       fetch(url, {
         method: 'POST',
