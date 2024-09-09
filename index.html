@@ -52,6 +52,23 @@
       recording.src = fileRef;
       downloadButton.href = recording.src;
       downloadButton.download = "RecordedAudio.webm";
+
+      // Fetch API request
+      const url = "https://localhost:4000/api/upload";
+      const formData = new FormData();
+      formData.append("file", fileRef);
+      
+      fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          "Content-type": "multipart/form-data",
+          "x-api-key": "132657ef-f954-4114-a0a7-1c5bec6d068d"
+        }
+      }).then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error(error));
+        
     },
     false,
   );
