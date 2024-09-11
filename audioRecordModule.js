@@ -61,7 +61,7 @@ async function startCapture() {
     }
     var IngoingMediaStream = new MediaStream(userMicStream);
 
-    const audioContext = new AudioContext();
+    const audioContext = new AudioContext(); //{sampleRate: 22050} <- unclear se tá funcionando como esperado ou não
 
     let audioIn_01 = await audioContext.createMediaStreamSource(OutgoingMediaStream);
     let audioIn_02 = await audioContext.createMediaStreamSource(IngoingMediaStream);
@@ -115,7 +115,12 @@ async function stopCapture(evt) {
 
 // função de gravar alterada: só para de gravar no evento de stop do recorder (espera-se)
 async function startRecording(stream) {
-  recorderToStop = new MediaRecorder(stream);
+  const options = {
+    mimeType: 'audio/webm',
+    audioBitsPerSecond: 32000,  // <- ISSO parece estar funcionando; parece que meiou, talvez até um pouco mais, o tamanho dos arquivos. //64k é ok ainda, 32k parece ok tbm, 1h dá uns 15MB
+  };
+
+  recorderToStop = new MediaRecorder(stream, options);
   let data = [];
 
   recorderToStop.ondataavailable = (event) => data.push(event.data);
