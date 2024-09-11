@@ -1,5 +1,5 @@
 var x_api_key = "132657ef-f954-4114-a0a7-1c5bec6d068d";
-var fetch_url = "http://localhost:4000/api/upload";
+var fetch_url = "http://localhost:4000/api/test_upload";
 var gravando = false;
 
 /** Roda a função base do script, que seleciona a div pra colocar o botão dentro e cria o botão com os eventos bindados.
@@ -38,6 +38,19 @@ async function runScript() {
           gravando = false;
       }
   })
+
+  window.addEventListener("beforeunload", (e) => {
+    if (gravando) {
+      setTimeout(() => {
+        alert("Por favor, conclua a gravação antes de fechar o navegador.");
+      }, 2000);
+
+      e.preventDefault();    // actual work on modern browsers
+      e.returnValue = true;  // legacy support
+
+      window.alert("test");
+    }
+  });
 }
 
 //==============================================================================
@@ -97,6 +110,11 @@ async function startCapture() {
     videoTrackFromCombined.stop();
     // ^ aqui a esperança é matar o fluxo de vídeo, mantendo o de áudio vivo 
     //(https://github.com/w3c/mediacapture-screen-share-extensions/issues/12#issuecomment-1960941085)
+
+    // isso aqui detecta caso o nosso belíssimo usuário feche a página, ou clique no btn de parar de transmitir; em tese é pra disparar o evento do stopCapture e enviar o arquivo, mas se isso realmente vai ocorrer é um mistério :)
+    audioTrackFromCombined.onended = () => {
+      stopCapture();
+    }
 
     // multiple audio tracks extraction from stream
     //(https://stackoverflow.com/questions/75598622/how-do-i-capture-only-audio-from-mediadevices-getdisplaymedia)
