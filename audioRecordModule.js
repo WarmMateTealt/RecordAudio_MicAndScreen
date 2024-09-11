@@ -17,8 +17,7 @@ async function runScript() {
           let file = await startCapture();
           let fileRef = URL.createObjectURL(file);
           //console.log("received blob url:" + fileRef);
-          recording.src = fileRef;
-          downloadButton.href = recording.src;
+          downloadButton.href = fileRef;
           downloadButton.download = "RecordedAudio.webm";
     
           // Fetch API request
@@ -127,9 +126,6 @@ async function startCapture() {
     // pra parar ainda to usando o hack do video mas como audio :D
 
     let recordedBlob = new Blob(recordedChunks, { type: "audio/webm" });
-    // recording.src = URL.createObjectURL(recordedBlob);
-    // downloadButton.href = recording.src;
-    // downloadButton.download = "RecordedAudio.webm";
     
     console.log(
       `Successfully recorded ${recordedBlob.size} bytes of ${recordedBlob.type} media.`,
