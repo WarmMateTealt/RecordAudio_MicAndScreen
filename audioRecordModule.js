@@ -13,11 +13,10 @@ async function runScript() {
   btn.innerHTML = "Gravar";
   btn.addEventListener("click", async () => {
       if (gravando === false) {
-          console.log("click");
+          //console.log("click");
           let file = await startCapture();
-          console.log(gravando);
           let fileRef = URL.createObjectURL(file);
-          console.log("received blob url:" + fileRef);
+          //console.log("received blob url:" + fileRef);
           recording.src = fileRef;
           downloadButton.href = recording.src;
           downloadButton.download = "RecordedAudio.webm";
@@ -39,7 +38,6 @@ async function runScript() {
           stopCapture();
           gravando = false;
       }
-      alert(gravando);
   })
 }
 
@@ -85,7 +83,7 @@ const displayMediaOptions = {
  * Considerações sobre a quantidade de memória requerida para armazenar a gravação estão em análise.
  * Retorna um Blob contendo a gravação em formato WEBM (áudio). */
 async function startCapture() {
-  console.log("internal start capture");
+  //console.log("internal start capture");
 
   try {
     let userMicStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true, });
@@ -175,7 +173,7 @@ async function startRecording(stream) {
 
   recorderToStop.ondataavailable = (event) => data.push(event.data);
   recorderToStop.start();
-  console.log(`${recorderToStop.state} - audio channel`);
+  //console.log(`${recorderToStop.state} - audio channel`);
 
   let stopped = new Promise((resolve, reject) => {
     recorderToStop.onstop = resolve;
