@@ -29,56 +29,9 @@
   <audio id="recording" controls></audio> <!--esse pra ver o áudio-->
   <a id="downloadButton" class="button">Download</a>
 
-  
+  <div id="btn_recording_integration"></div>
+  <script type="module" src="audioRecordModule.js"></script>
 </body>
 
 </html>
 
-<script type="module">
-  import { startCapture, stopCapture } from "./audioRecordModule.js";
-  
-  const startElem = document.getElementById("start");
-  const stopElem = document.getElementById("stop");
-  const recordingElem = document.getElementById("recording");
-  var fileRef;
-  var file;
-  
-  // Set event listeners for the start and stop buttons
-  startElem.addEventListener(
-    "click",
-    async (evt) => {
-      console.log("click");
-      file = await startCapture();
-      fileRef = URL.createObjectURL(file);
-      console.log("received blob url:" + fileRef);
-      recording.src = fileRef;
-      downloadButton.href = recording.src;
-      downloadButton.download = "RecordedAudio.webm";
-
-      // Fetch API request
-      const url = "http://localhost:4000/api/upload";
-      const formData = new FormData();
-      formData.append("file", file, "RecordedAudio.webm");
-      
-      fetch(url, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          "x-api-key": "132657ef-f954-4114-a0a7-1c5bec6d068d"
-        }
-      }).then(response => response.json())
-        .then(data => console.log(data))
-        .catch(error => console.error(error));
-        
-    },
-    false,
-  );
-
-  stopElem.addEventListener(
-    "click",
-    (evt) => {
-      stopCapture();
-    },
-    false,
-  );
-</script>

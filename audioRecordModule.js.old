@@ -1,52 +1,3 @@
-var x_api_key = "132657ef-f954-4114-a0a7-1c5bec6d068d";
-var fetch_url = "http://localhost:4000/api/upload";
-var gravando = false;
-
-/** Roda a função base do script, que seleciona a div pra colocar o botão dentro e cria o botão com os eventos bindados.
- */
-async function runScript() {
-  let divSelecionada = document.querySelector("#btn_recording_integration");
-  let btn = document.createElement("button");
-
-  divSelecionada.append(btn);
-
-  btn.innerHTML = "Gravar";
-  btn.addEventListener("click", async () => {
-      if (gravando === false) {
-          console.log("click");
-          let file = await startCapture();
-          console.log(gravando);
-          let fileRef = URL.createObjectURL(file);
-          console.log("received blob url:" + fileRef);
-          recording.src = fileRef;
-          downloadButton.href = recording.src;
-          downloadButton.download = "RecordedAudio.webm";
-    
-          // Fetch API request
-          const formData = new FormData();
-          formData.append("file", file, "RecordedAudio.webm");
-          
-          fetch(fetch_url, {
-            method: 'POST',
-            body: formData,
-            headers: {
-              "x-api-key": x_api_key
-            }
-          }).then(response => response.json())
-            .then(data => console.log(data))
-            .catch(error => console.error(error));
-      } else {
-          stopCapture();
-          gravando = false;
-      }
-      alert(gravando);
-  })
-}
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
 /**
  * Módulo para a gravação simultânea de áudio vindo do mic do usuário e da aba do navegador aberta.
  * Preocupação sobre compatibilidade entre navegadores. Talvez posteriormente tratar com https://github.com/webrtc/adapter
@@ -93,7 +44,6 @@ async function startCapture() {
     let displayMediaCombinedStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
     sourceToStop_02 = displayMediaCombinedStream;
     //throw error and call stop rec (release streams) if any of these go awry
-    gravando = true;
 
     const audioTrackFromCombined = displayMediaCombinedStream.getAudioTracks()[0];
     const videoTrackFromCombined = displayMediaCombinedStream.getVideoTracks()[0];
@@ -185,5 +135,4 @@ async function startRecording(stream) {
   return stopped.then(() => data);
 }
 
-runScript();
-export { startCapture, stopCapture, x_api_key, fetch_url };
+export { startCapture, stopCapture };
